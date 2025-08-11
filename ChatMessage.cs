@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json;
+using System.Collections.Generic; // Added for List<string>
 
 namespace ChatClient
 {
@@ -105,10 +106,23 @@ namespace ChatClient
             {
                 return $"[{Timestamp:HH:mm:ss}] {From} -> {To}: {Message}";
             }
+            else if (type == "userlist")
+            {
+                return $"[{Timestamp:HH:mm:ss}] User list updated";
+            }
             else
             {
                 return $"[{Timestamp:HH:mm:ss}] {From}: {Message}";
             }
+        }
+
+        /// <summary>
+        /// Creates a user list message containing the list of online users
+        /// </summary>
+        public static ChatMessage CreateUserListMessage(List<string> usernames)
+        {
+            var userListJson = JsonConvert.SerializeObject(usernames);
+            return new ChatMessage("UserList", "Server", "", userListJson);
         }
     }
 } 

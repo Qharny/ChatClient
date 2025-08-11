@@ -387,12 +387,15 @@ namespace ChatClient
                 // Send join message
                 try
                 {
-                    var joinMessage = new ChatMessage("join", _currentUsername, "", "joined the chat");
-                    await _connection.SendMessageAsync(joinMessage);
+                    var connectMessage = new ChatMessage("connect", _currentUsername, "", "");
+                    await _connection.SendMessageAsync(connectMessage);
+                    
+                    // Request current user list
+                    await RequestUserList();
                 }
                 catch (Exception ex)
                 {
-                    AddSystemMessage($"Warning: Could not send join message: {ex.Message}");
+                    AddSystemMessage($"Warning: Could not send connect message: {ex.Message}");
                 }
             }
             catch (Exception ex)
@@ -411,15 +414,15 @@ namespace ChatClient
                 {
                     try
                     {
-                        var leaveMessage = new ChatMessage("leave", _currentUsername, "", "left the chat");
-                        await _connection.SendMessageAsync(leaveMessage);
+                        var disconnectMessage = new ChatMessage("disconnect", _currentUsername, "", "");
+                        await _connection.SendMessageAsync(disconnectMessage);
                         
                         // Wait a moment for the message to be sent
                         await Task.Delay(200);
                     }
                     catch (Exception ex)
                     {
-                        AddSystemMessage($"Warning: Could not send leave message: {ex.Message}");
+                        AddSystemMessage($"Warning: Could not send disconnect message: {ex.Message}");
                     }
                 }
 
@@ -515,6 +518,19 @@ namespace ChatClient
             }
         }
 
+        private async Task RequestUserList()
+        {
+            try
+            {
+                var userListRequest = new ChatMessage("userlist", _currentUsername, "", "");
+                await _connection.SendMessageAsync(userListRequest);
+            }
+            catch (Exception ex)
+            {
+                AddSystemMessage($"Warning: Could not request user list: {ex.Message}");
+            }
+        }
+
         private void Connection_MessageReceived(object sender, ChatMessage message)
         {
             if (this.InvokeRequired)
@@ -539,10 +555,10 @@ namespace ChatClient
                 case "private":
                     AddPrivateMessage(message);
                     break;
-                case "join":
+                case "connect":
                     AddSystemMessage($"{message.From} joined the chat");
                     break;
-                case "leave":
+                case "disconnect":
                     AddSystemMessage($"{message.From} left the chat");
                     break;
                 case null:
@@ -568,14 +584,20 @@ namespace ChatClient
                 lstOnlineUsers.Items.Clear();
                 _onlineUsers.Clear();
                 
-                foreach (var user in users)
+                if (users != null)
                 {
-                    if (user != _currentUsername)
+                    foreach (var user in users)
                     {
-                        lstOnlineUsers.Items.Add(user);
-                        _onlineUsers.Add(user);
+                        if (!string.IsNullOrWhiteSpace(user) && user != _currentUsername)
+                        {
+                            lstOnlineUsers.Items.Add(user);
+                            _onlineUsers.Add(user);
+                        }
                     }
                 }
+                
+                // Update the online users label to show count
+                lblOnlineUsers.Text = $"Online Users ({lstOnlineUsers.Items.Count})";
             }
             catch (Exception ex)
             {
