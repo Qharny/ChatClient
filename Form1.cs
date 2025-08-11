@@ -13,6 +13,7 @@ namespace ChatClient
         private List<string> _onlineUsers = new List<string>();
 
         // UI Controls
+        private Panel pnlConnection;
         private TextBox txtServerIP;
         private TextBox txtPort;
         private TextBox txtUsername;
@@ -29,6 +30,18 @@ namespace ChatClient
         private Label lblChat;
         private Label lblOnlineUsers;
         private Label lblMessage;
+        private Panel pnlChat;
+        private Panel pnlUsers;
+        private Panel pnlInput;
+
+        // Modern colors
+        private Color PrimaryColor = Color.FromArgb(52, 152, 219);
+        private Color SecondaryColor = Color.FromArgb(41, 128, 185);
+        private Color BackgroundColor = Color.FromArgb(236, 240, 241);
+        private Color PanelColor = Color.White;
+        private Color TextColor = Color.FromArgb(44, 62, 80);
+        private Color SuccessColor = Color.FromArgb(46, 204, 113);
+        private Color ErrorColor = Color.FromArgb(231, 76, 60);
 
         public MainForm()
         {
@@ -41,11 +54,13 @@ namespace ChatClient
             this.SuspendLayout();
 
             // Form properties
-            this.Text = "Chat Client";
-            this.Size = new Size(800, 600);
+            this.Text = "Modern Chat Client";
+            this.Size = new Size(1000, 700);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
+            this.BackColor = BackgroundColor;
+            this.Font = new Font("Segoe UI", 9F, FontStyle.Regular);
 
             // Create controls
             CreateControls();
@@ -58,129 +73,220 @@ namespace ChatClient
         private void CreateControls()
         {
             // Connection panel
+            pnlConnection = new Panel
+            {
+                BackColor = PanelColor,
+                BorderStyle = BorderStyle.None,
+                Padding = new Padding(15),
+                Height = 80
+            };
+
             lblServerIP = new Label
             {
                 Text = "Server IP:",
-                Location = new Point(10, 15),
+                Location = new Point(15, 20),
                 Size = new Size(70, 20),
-                TextAlign = ContentAlignment.MiddleLeft
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                ForeColor = TextColor
             };
 
             txtServerIP = new TextBox
             {
-                Location = new Point(85, 12),
-                Size = new Size(120, 23),
-                Text = "127.0.0.1"
+                Location = new Point(90, 17),
+                Size = new Size(120, 25),
+                Text = "127.0.0.1",
+                Font = new Font("Segoe UI", 9F),
+                BorderStyle = BorderStyle.FixedSingle
             };
 
             lblPort = new Label
             {
                 Text = "Port:",
-                Location = new Point(220, 15),
+                Location = new Point(225, 20),
                 Size = new Size(40, 20),
-                TextAlign = ContentAlignment.MiddleLeft
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                ForeColor = TextColor
             };
 
             txtPort = new TextBox
             {
-                Location = new Point(265, 12),
-                Size = new Size(60, 23),
-                Text = "8888"
+                Location = new Point(270, 17),
+                Size = new Size(60, 25),
+                Text = "8888",
+                Font = new Font("Segoe UI", 9F),
+                BorderStyle = BorderStyle.FixedSingle
             };
 
             lblUsername = new Label
             {
                 Text = "Username:",
-                Location = new Point(340, 15),
+                Location = new Point(345, 20),
                 Size = new Size(70, 20),
-                TextAlign = ContentAlignment.MiddleLeft
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                ForeColor = TextColor
             };
 
             txtUsername = new TextBox
             {
-                Location = new Point(415, 12),
-                Size = new Size(120, 23),
-                Text = "User" + new Random().Next(1000, 9999)
+                Location = new Point(420, 17),
+                Size = new Size(120, 25),
+                Text = "User" + new Random().Next(1000, 9999),
+                Font = new Font("Segoe UI", 9F),
+                BorderStyle = BorderStyle.FixedSingle
             };
 
             btnConnect = new Button
             {
                 Text = "Connect",
-                Location = new Point(550, 10),
-                Size = new Size(80, 28)
+                Location = new Point(555, 15),
+                Size = new Size(100, 30),
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = PrimaryColor,
+                ForeColor = Color.White,
+                Cursor = Cursors.Hand
             };
 
-            // Chat messages
+            // Chat panel
+            pnlChat = new Panel
+            {
+                BackColor = PanelColor,
+                BorderStyle = BorderStyle.None,
+                Padding = new Padding(15)
+            };
+
             lblChat = new Label
             {
-                Text = "Chat Messages:",
-                Location = new Point(10, 50),
-                Size = new Size(100, 20),
-                TextAlign = ContentAlignment.MiddleLeft
+                Text = "Chat Messages",
+                Location = new Point(15, 15),
+                Size = new Size(150, 25),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = new Font("Segoe UI", 12F, FontStyle.Bold),
+                ForeColor = TextColor
             };
 
             lstChatMessages = new ListBox
             {
-                Location = new Point(10, 75),
-                Size = new Size(500, 300),
-                Font = new Font("Consolas", 9F)
+                Location = new Point(15, 45),
+                Size = new Size(600, 400),
+                Font = new Font("Consolas", 9F),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.FromArgb(248, 249, 250),
+                ForeColor = TextColor
             };
 
-            // Online users
+            // Users panel
+            pnlUsers = new Panel
+            {
+                BackColor = PanelColor,
+                BorderStyle = BorderStyle.None,
+                Padding = new Padding(15)
+            };
+
             lblOnlineUsers = new Label
             {
-                Text = "Online Users:",
-                Location = new Point(520, 50),
-                Size = new Size(100, 20),
-                TextAlign = ContentAlignment.MiddleLeft
+                Text = "Online Users",
+                Location = new Point(15, 15),
+                Size = new Size(120, 25),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = new Font("Segoe UI", 12F, FontStyle.Bold),
+                ForeColor = TextColor
             };
 
             lstOnlineUsers = new ListBox
             {
-                Location = new Point(520, 75),
-                Size = new Size(250, 300)
+                Location = new Point(15, 45),
+                Size = new Size(250, 400),
+                Font = new Font("Segoe UI", 9F),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.FromArgb(248, 249, 250),
+                ForeColor = TextColor
             };
 
-            // Message input
+            // Input panel
+            pnlInput = new Panel
+            {
+                BackColor = PanelColor,
+                BorderStyle = BorderStyle.None,
+                Padding = new Padding(15),
+                Height = 80
+            };
+
             lblMessage = new Label
             {
                 Text = "Message:",
-                Location = new Point(10, 390),
-                Size = new Size(60, 20),
-                TextAlign = ContentAlignment.MiddleLeft
+                Location = new Point(15, 20),
+                Size = new Size(70, 20),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                ForeColor = TextColor
             };
 
             txtMessage = new TextBox
             {
-                Location = new Point(75, 387),
-                Size = new Size(435, 23),
+                Location = new Point(90, 17),
+                Size = new Size(500, 25),
+                Font = new Font("Segoe UI", 9F),
+                BorderStyle = BorderStyle.FixedSingle,
                 Multiline = false
             };
 
             btnSend = new Button
             {
                 Text = "Send",
-                Location = new Point(520, 385),
-                Size = new Size(80, 28),
+                Location = new Point(600, 15),
+                Size = new Size(80, 30),
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = SuccessColor,
+                ForeColor = Color.White,
+                Cursor = Cursors.Hand,
                 Enabled = false
             };
 
             // Status strip
-            statusStrip = new StatusStrip();
-            lblStatus = new ToolStripStatusLabel("Disconnected");
+            statusStrip = new StatusStrip
+            {
+                BackColor = PanelColor,
+                ForeColor = TextColor
+            };
+            lblStatus = new ToolStripStatusLabel("Disconnected")
+            {
+                Font = new Font("Segoe UI", 9F)
+            };
             statusStrip.Items.Add(lblStatus);
 
-            // Add controls to form
-            this.Controls.AddRange(new Control[]
+            // Add controls to panels
+            pnlConnection.Controls.AddRange(new Control[]
             {
                 lblServerIP, txtServerIP,
                 lblPort, txtPort,
                 lblUsername, txtUsername,
-                btnConnect,
-                lblChat, lstChatMessages,
-                lblOnlineUsers, lstOnlineUsers,
-                lblMessage, txtMessage, btnSend,
-                statusStrip
+                btnConnect
+            });
+
+            pnlChat.Controls.AddRange(new Control[]
+            {
+                lblChat, lstChatMessages
+            });
+
+            pnlUsers.Controls.AddRange(new Control[]
+            {
+                lblOnlineUsers, lstOnlineUsers
+            });
+
+            pnlInput.Controls.AddRange(new Control[]
+            {
+                lblMessage, txtMessage, btnSend
+            });
+
+            // Add panels to form
+            this.Controls.AddRange(new Control[]
+            {
+                pnlConnection, pnlChat, pnlUsers, pnlInput, statusStrip
             });
 
             // Wire up events
@@ -188,12 +294,41 @@ namespace ChatClient
             btnSend.Click += BtnSend_Click;
             txtMessage.KeyPress += TxtMessage_KeyPress;
             lstOnlineUsers.DoubleClick += LstOnlineUsers_DoubleClick;
+
+            // Add hover effects
+            btnConnect.MouseEnter += (s, e) => btnConnect.BackColor = SecondaryColor;
+            btnConnect.MouseLeave += (s, e) => btnConnect.BackColor = PrimaryColor;
+            btnSend.MouseEnter += (s, e) => btnSend.BackColor = Color.FromArgb(39, 174, 96);
+            btnSend.MouseLeave += (s, e) => btnSend.BackColor = SuccessColor;
         }
 
         private void LayoutControls()
         {
             // Set form minimum size
-            this.MinimumSize = new Size(800, 600);
+            this.MinimumSize = new Size(1000, 700);
+
+            // Layout panels
+            pnlConnection.Location = new Point(0, 0);
+            pnlConnection.Width = this.ClientSize.Width;
+            pnlConnection.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
+            pnlChat.Location = new Point(0, 80);
+            pnlChat.Width = this.ClientSize.Width - 300;
+            pnlChat.Height = this.ClientSize.Height - 200;
+            pnlChat.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+
+            pnlUsers.Location = new Point(this.ClientSize.Width - 280, 80);
+            pnlUsers.Width = 280;
+            pnlUsers.Height = this.ClientSize.Height - 200;
+            pnlUsers.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
+
+            pnlInput.Location = new Point(0, this.ClientSize.Height - 120);
+            pnlInput.Width = this.ClientSize.Width;
+            pnlInput.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+
+            statusStrip.Location = new Point(0, this.ClientSize.Height - 22);
+            statusStrip.Width = this.ClientSize.Width;
+            statusStrip.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
         }
 
         private void InitializeConnection()
@@ -312,6 +447,7 @@ namespace ChatClient
             txtPort.Enabled = enable;
             txtUsername.Enabled = enable;
             btnConnect.Text = enable ? "Connect" : "Disconnect";
+            btnConnect.BackColor = enable ? PrimaryColor : ErrorColor;
             btnSend.Enabled = !enable;
             txtMessage.Enabled = !enable;
         }
