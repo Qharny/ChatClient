@@ -152,12 +152,29 @@ namespace ChatClient
                     {
                         try
                         {
+                            // Try to parse as JSON first
                             ChatMessage message = ChatMessage.FromJson(line);
                             MessageReceived?.Invoke(this, message);
                         }
                         catch (Exception ex)
                         {
-                            ErrorOccurred?.Invoke(this, $"Failed to parse message: {ex.Message}");
+                            // If JSON parsing fails, try to handle as plain text
+                            try
+                            {
+                                ChatMessage fallbackMessage = HandleNonJsonMessage(line);
+                                if (fallbackMessage != null)
+                                {
+                                    MessageReceived?.Invoke(this, fallbackMessage);
+                                }
+                                else
+                                {
+                                    ErrorOccurred?.Invoke(this, $"Failed to parse message: {ex.Message}. Raw message: {line}");
+                                }
+                            }
+                            catch (Exception fallbackEx)
+                            {
+                                ErrorOccurred?.Invoke(this, $"Failed to parse message: {ex.Message}. Raw message: {line}");
+                            }
                         }
                     }
                 }
@@ -174,6 +191,36 @@ namespace ChatClient
                 _isConnected = false;
                 ConnectionStatusChanged?.Invoke(this, false);
             }
+        }
+
+        /// <summary>
+        /// Handles non-JSON messages from the server
+        /// </summary>
+        private ChatMessage HandleNonJsonMessage(string rawMessage)
+        {
+            // Handle common server messages that might not be in JSON format
+            if (rawMessage.Contains("Welcome to the chat server!"))
+            {
+                return new ChatMessage("system", "", "", "Welcome to the chat server!");
+            }
+            
+            if (rawMessage.Contains("Invalid JSON format"))
+            {
+                return new ChatMessage("system", "", "", "Server error: Invalid JSON format");
+            }
+            
+            if (rawMessage.Contains("Unknown message type"))
+            {
+                return new ChatMessage("system", "", "", "Server error: Unknown message type");
+            }
+
+            // If it looks like a simple text message, treat it as a system message
+            if (!rawMessage.StartsWith("{") && !rawMessage.StartsWith("["))
+            {
+                return new ChatMessage("system", "", "", rawMessage);
+            }
+
+            return null;
         }
 
         /// <summary>

@@ -246,9 +246,19 @@ namespace ChatClient
                 // Connect to server
                 await _connection.ConnectAsync(txtServerIP.Text.Trim(), port);
 
+                // Wait a moment for connection to stabilize
+                await Task.Delay(500);
+
                 // Send join message
-                var joinMessage = new ChatMessage("join", _currentUsername, "", "joined the chat");
-                await _connection.SendMessageAsync(joinMessage);
+                try
+                {
+                    var joinMessage = new ChatMessage("join", _currentUsername, "", "joined the chat");
+                    await _connection.SendMessageAsync(joinMessage);
+                }
+                catch (Exception ex)
+                {
+                    AddSystemMessage($"Warning: Could not send join message: {ex.Message}");
+                }
             }
             catch (Exception ex)
             {
@@ -257,14 +267,32 @@ namespace ChatClient
             }
         }
 
-        private void DisconnectFromServer()
+        private async void DisconnectFromServer()
         {
             try
             {
+                // Send leave message if connected
+                if (_connection.IsConnected)
+                {
+                    try
+                    {
+                        var leaveMessage = new ChatMessage("leave", _currentUsername, "", "left the chat");
+                        await _connection.SendMessageAsync(leaveMessage);
+                        
+                        // Wait a moment for the message to be sent
+                        await Task.Delay(200);
+                    }
+                    catch (Exception ex)
+                    {
+                        AddSystemMessage($"Warning: Could not send leave message: {ex.Message}");
+                    }
+                }
+
                 _connection.Disconnect();
                 SetConnectionControls(true);
                 _onlineUsers.Clear();
                 lstOnlineUsers.Items.Clear();
+                AddSystemMessage("Disconnected from server");
             }
             catch (Exception ex)
             {
@@ -360,7 +388,7 @@ namespace ChatClient
             }
 
             // Handle different message types
-            switch (message.Type.ToLower())
+            switch (message.Type?.ToLower())
             {
                 case "userlist":
                     UpdateOnlineUsers(message.Message);
@@ -368,8 +396,30 @@ namespace ChatClient
                 case "system":
                     AddSystemMessage(message.Message);
                     break;
-                default:
+                case "chat":
+                case "broadcast":
                     AddChatMessage(message);
+                    break;
+                case "private":
+                    AddPrivateMessage(message);
+                    break;
+                case "join":
+                    AddSystemMessage($"{message.From} joined the chat");
+                    break;
+                case "leave":
+                    AddSystemMessage($"{message.From} left the chat");
+                    break;
+                case null:
+                case "":
+                    // Handle messages without a type
+                    if (!string.IsNullOrEmpty(message.Message))
+                    {
+                        AddSystemMessage(message.Message);
+                    }
+                    break;
+                default:
+                    // Handle unknown message types
+                    AddSystemMessage($"Unknown message type '{message.Type}': {message.Message}");
                     break;
             }
         }
@@ -407,6 +457,13 @@ namespace ChatClient
         {
             var systemMessage = new ChatMessage("system", "", "", message);
             lstChatMessages.Items.Add(systemMessage.GetDisplayText());
+            lstChatMessages.SelectedIndex = lstChatMessages.Items.Count - 1;
+        }
+
+        private void AddPrivateMessage(ChatMessage message)
+        {
+            string displayText = $"[{message.Timestamp:HH:mm:ss}] {message.From} -> {message.To}: {message.Message}";
+            lstChatMessages.Items.Add(displayText);
             lstChatMessages.SelectedIndex = lstChatMessages.Items.Count - 1;
         }
 

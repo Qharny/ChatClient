@@ -71,7 +71,23 @@ namespace ChatClient
         /// </summary>
         public static ChatMessage FromJson(string json)
         {
-            return JsonConvert.DeserializeObject<ChatMessage>(json);
+            try
+            {
+                var message = JsonConvert.DeserializeObject<ChatMessage>(json);
+                
+                // Ensure Type is never null
+                if (string.IsNullOrEmpty(message.Type))
+                {
+                    message.Type = "system";
+                }
+                
+                return message;
+            }
+            catch (JsonException ex)
+            {
+                // If JSON parsing fails completely, create a system message with the raw text
+                return new ChatMessage("system", "", "", $"Raw message: {json}");
+            }
         }
 
         /// <summary>
@@ -79,11 +95,13 @@ namespace ChatClient
         /// </summary>
         public string GetDisplayText()
         {
-            if (Type == "system")
+            string type = Type ?? "system";
+            
+            if (type == "system")
             {
                 return $"[{Timestamp:HH:mm:ss}] {Message}";
             }
-            else if (Type == "private")
+            else if (type == "private")
             {
                 return $"[{Timestamp:HH:mm:ss}] {From} -> {To}: {Message}";
             }
